@@ -2,6 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_integrate/api/api_page.dart';
 import 'package:firebase_integrate/crud/sport_details.dart';
 import 'package:firebase_integrate/form/form_page_one.dart';
+import 'package:firebase_integrate/api/http_crud.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
@@ -127,11 +128,24 @@ class _MyHomePageState extends State<MyHomePage> {
               },
               child: const Text('Go to Fav Sport page'),
             ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                // Navigate to FormPageOne
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const HttpCrud(),
+                  ),
+                );
+              },
+              child: const Text('Go to Fav Sport page'),
+            ),
             const SizedBox(
                 height: 20), // Add spacing between user information and button
             ElevatedButton(
               onPressed: () {
-                // Navigate to FormPageOne
+                // Navigate to ApiPage
                 Navigator.push(
                   context,
                   MaterialPageRoute(
