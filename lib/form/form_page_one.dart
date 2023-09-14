@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class FormPageOne extends StatefulWidget {
   final String? userName;
   final String? email;
+
   const FormPageOne({Key? key, this.email, this.userName}) : super(key: key);
 
   @override
@@ -14,15 +15,18 @@ class FormPageOne extends StatefulWidget {
 class _FormPageOneState extends State<FormPageOne> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-//getting the instance of the collection
+  // Getting the instance of the collection
   CollectionReference users = FirebaseFirestore.instance.collection('Users');
 
   String? _userName;
   String? _userEmail;
-  String? _age = '';
-  String? _password = '';
+  final TextEditingController _ageController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _cityController = TextEditingController();
+  final TextEditingController _genderController = TextEditingController();
+
   String? _selectedCity = 'Select City';
-  String? _gender = 'Male';
+  String? _selectedGender = 'Male'; // Store selected gender
   final List<String> _favoriteSports = [];
 
   final List<String> _genderOptions = ['Male', 'Female', 'Other'];
@@ -46,6 +50,7 @@ class _FormPageOneState extends State<FormPageOne> {
   @override
   void initState() {
     super.initState();
+    // Setting username and email on page load
     _userName = widget.userName;
     _userEmail = widget.email;
   }
@@ -65,16 +70,18 @@ class _FormPageOneState extends State<FormPageOne> {
             children: <Widget>[
               TextFormField(
                 initialValue: _userName, // Set the initial value
-                decoration:
-                    const InputDecoration.collapsed(hintText: 'User name'),
+                decoration: const InputDecoration(
+                  labelText: 'User name',
+                ),
                 readOnly: true, // Make it read-only
               ),
 
               // Text field to display _userEmail
               TextFormField(
                 initialValue: _userEmail, // Set the initial value
-                decoration:
-                    const InputDecoration.collapsed(hintText: 'User Email'),
+                decoration: const InputDecoration(
+                  labelText: 'User Email',
+                ),
                 readOnly: true, // Make it read-only
               ),
               TextFormField(
@@ -86,9 +93,7 @@ class _FormPageOneState extends State<FormPageOne> {
                   }
                   return null;
                 },
-                onChanged: (value) {
-                  _age = value;
-                },
+                controller: _ageController,
               ),
               TextFormField(
                 decoration: const InputDecoration(labelText: 'Password'),
@@ -99,28 +104,30 @@ class _FormPageOneState extends State<FormPageOne> {
                   }
                   return null;
                 },
-                onChanged: (value) {
-                  _password = value;
-                },
+                controller: _passwordController,
               ),
               const Padding(padding: EdgeInsets.all(10)),
               const Text('Gender'),
-              Row(
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: _genderOptions
-                    .map((gender) => Row(
-                          children: [
-                            Radio(
-                              value: gender,
-                              groupValue: _gender,
-                              onChanged: (value) {
-                                setState(() {
-                                  _gender = value.toString();
-                                });
-                              },
-                            ),
-                            Text(gender),
-                          ],
-                        ))
+                    .map(
+                      (gender) => Row(
+                        children: [
+                          Radio(
+                            value: gender,
+                            groupValue: _selectedGender,
+                            onChanged: (value) {
+                              setState(() {
+                                _selectedGender = value.toString();
+                                _genderController.text = value.toString();
+                              });
+                            },
+                          ),
+                          Text(gender),
+                        ],
+                      ),
+                    )
                     .toList(),
               ),
               const SizedBox(height: 16.0),
@@ -135,6 +142,7 @@ class _FormPageOneState extends State<FormPageOne> {
                 onChanged: (String? value) {
                   setState(() {
                     _selectedCity = value;
+                    _cityController.text = value.toString();
                   });
                 },
                 value: _selectedCity,
@@ -169,32 +177,39 @@ class _FormPageOneState extends State<FormPageOne> {
               const SizedBox(height: 16.0),
               ElevatedButton(
                 onPressed: () async {
-                  //logic to validate form key and write data into firestore db
+                  // Logic to validate form key and write data into firestore db
                   if (_formKey.currentState?.validate() ?? false) {
                     _formKey.currentState?.save();
-                    // Process and submit the form data
-                    await users
-                        .add({
-                          'name': _userName,
-                          'email': _userEmail,
-                          'age': _age,
-                          'city': _selectedCity,
-                          'password': _password,
-                          'favSport': _favoriteSports,
-                          'gender': _gender,
-                        })
-                        .then(
-                          (value) => Get.snackbar(
-                              "Success", "Your information has been logged",
-                              snackPosition: SnackPosition.BOTTOM,
-                              backgroundColor: Colors.green.withOpacity(0.2),
-                              colorText: Colors.green),
-                        )
-                        .catchError((error) => Get.snackbar(
-                            "Failed", "Some problem occured",
-                            snackPosition: SnackPosition.BOTTOM,
-                            backgroundColor: Colors.red.withOpacity(0.2),
-                            colorText: Colors.black));
+                    try {
+                      // Process and submit the form data
+                      await users.add({
+                        'name': _userName,
+                        'email': _userEmail,
+                        'age': _ageController
+                            .text, // Use .text to get the text from controllers
+                        'city': _cityController.text,
+                        'password': _passwordController.text,
+                        'favSport': _favoriteSports,
+                        'gender': _genderController.text,
+                      });
+                      // Show success SnackBar
+                      Get.snackbar(
+                        "Success",
+                        "Your information has been logged",
+                        snackPosition: SnackPosition.BOTTOM,
+                        backgroundColor: Colors.green.withOpacity(0.2),
+                        colorText: Colors.green,
+                      );
+                    } catch (error) {
+                      // Show error SnackBar
+                      Get.snackbar(
+                        "Failed",
+                        "Some problem occurred",
+                        snackPosition: SnackPosition.BOTTOM,
+                        backgroundColor: Colors.red.withOpacity(0.2),
+                        colorText: Colors.black,
+                      );
+                    }
                   }
                 },
                 child: const Text('Submit'),

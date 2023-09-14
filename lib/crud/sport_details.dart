@@ -14,31 +14,9 @@ class _SportDetailsState extends State<SportDetails> {
   final TextEditingController _playerController = TextEditingController();
   final TextEditingController _teamController = TextEditingController();
 
-  // Future<void> createUser(User user) async {
-  //   // Reference to the Firestore collection
-  //   final docUser = FirebaseFirestore.instance.collection('favsport').doc();
-  //   user.id = docUser.id;
-  //   //converting to json format
-  //   final json = user.toJson();
-  //   //adding the json file to the document
-  //   await docUser.set(json);
-  // }
-
   //creating a firebase instance referring a particular collection
   final CollectionReference _products =
       FirebaseFirestore.instance.collection('favsport');
-
-  // Stream<List<User>> readUsers() => FirebaseFirestore.instance
-  //     .collection('favsport')
-  //     .snapshots()
-  //     .map((snapshot) =>
-  //         snapshot.docs.map((doc) => User.fromJson(doc.data())).toList());
-
-  // Widget buildUser(User user) => ListTile(
-  //       leading: CircleAvatar(child: Text('$user.name')),
-  //       title: Text(user.team),
-  //       subtitle: Text(user.player),
-  //     );
 
   // Show a modal bottom sheet for creating a new product or editing an existing one.
   Future<void> _create([DocumentSnapshot? documentSnapshot]) async {
@@ -192,8 +170,7 @@ class _SportDetailsState extends State<SportDetails> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text('Player: ${documentSnapshot['player']}'),
-                          Text(
-                              'Team: ${documentSnapshot['team']}'), // Add this line
+                          Text('Team: ${documentSnapshot['team']}'),
                         ],
                       ),
                       trailing: SizedBox(

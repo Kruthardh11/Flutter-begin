@@ -1,10 +1,14 @@
+import 'dart:convert';
+
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_integrate/api/api_page.dart';
-import 'package:firebase_integrate/crud/sport_details.dart';
-import 'package:firebase_integrate/form/form_page_one.dart';
 import 'package:firebase_integrate/api/http_crud.dart';
+import 'package:firebase_integrate/crud/sport_details.dart';
+import 'package:firebase_integrate/dashboard/dashboard.dart';
+import 'package:firebase_integrate/form/form_page_one.dart';
+import 'package:firebase_integrate/routing/route_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:http/http.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -33,10 +37,16 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Your App Title',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.purple),
+        colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.blueGrey),
         useMaterial3: true,
       ),
-      home: const MyHomePage(),
+      initialRoute: '/',
+      routes: {
+        '/': (context) => MyHomePage(),
+        MyAppRouteConstants.formRouteName: (context) => FormPageOne(),
+        MyAppRouteConstants.sportsRouteName: (context) => SportDetails(),
+        MyAppRouteConstants.httpRouteName: (context) => HttpCrud(),
+      },
     );
   }
 }
@@ -52,8 +62,11 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   GoogleSignInAccount? _currentUser;
+  String? userEmail;
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
 
-//getting the current user details
+  //getting the current user details
   @override
   void initState() {
     _googleSignIn.onCurrentUserChanged.listen((account) {
@@ -68,14 +81,15 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          backgroundColor: Theme.of(context).colorScheme.secondary,
-          title: const Text(""),
-        ),
-        body: Container(
-          alignment: Alignment.center,
-          child: _buildWidget(),
-        ));
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.secondary,
+        title: const Text(""),
+      ),
+      body: Container(
+        alignment: Alignment.center,
+        child: _buildWidget(),
+      ),
+    );
   }
 
   Widget _buildWidget() {
@@ -93,70 +107,76 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
             const SizedBox(
-                height:
-                    20), // Add spacing between ListTile and user information
+              height: 20,
+            ),
             Text(' ${user.displayName ?? ''}'),
             Text(' ${user.email}'),
             const SizedBox(
-                height: 20), // Add spacing between user information and button
+              height: 20,
+            ),
             ElevatedButton(
               onPressed: () {
-                // Navigate to FormPageOne
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => FormPageOne(
-                      userName: user.displayName,
-                      email: user.email,
+                // Navigate to FormPageOne using Navigator
+                if (user != null) {
+                  String userEmail = user.email;
+                  String userDisplayName = user.displayName ?? '';
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => FormPageOne(
+                        email: userEmail,
+                        userName: userDisplayName,
+                      ),
                     ),
-                  ),
-                );
+                  );
+                }
               },
-              child: const Text('Go to FormPageOne'),
+              child: const Text('User Details Form'),
             ),
             const SizedBox(
-                height: 20), // Add spacing between user information and button
+              height: 20,
+            ),
+            // ElevatedButton(
+            //   onPressed: () {
+            //     // Navigate to sports using Navigator
+            //     Navigator.push(
+            //       context,
+            //       MaterialPageRoute(
+            //         builder: (context) => const SportDetails(),
+            //       ),
+            //     );
+            //   },
+            //   child: const Text('Go to Fav Sport page'),
+            // ),
+            // const SizedBox(height: 20),
+            // ElevatedButton(
+            //   onPressed: () {
+            //     // Navigate to http requests using Navigator
+            //     Navigator.push(
+            //       context,
+            //       MaterialPageRoute(
+            //         builder: (context) => const HttpCrud(),
+            //       ),
+            //     );
+            //   },
+            //   child: const Text('http requests'),
+            // ),
             ElevatedButton(
               onPressed: () {
-                // Navigate to FormPageOne
+                userEmail = user.email;
+                // Navigate to FormPageOne using Navigator
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const SportDetails(),
-                  ),
+                      builder: (context) => Dashboard(
+                            email: userEmail,
+                          )),
                 );
               },
-              child: const Text('Go to Fav Sport page'),
+              child: const Text('Dashboard'),
             ),
             const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                // Navigate to FormPageOne
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const HttpCrud(),
-                  ),
-                );
-              },
-              child: const Text('Go to Fav Sport page'),
-            ),
-            const SizedBox(
-                height: 20), // Add spacing between user information and button
-            ElevatedButton(
-              onPressed: () {
-                // Navigate to ApiPage
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const ApiPage(),
-                  ),
-                );
-              },
-              child: const Text('Manga Page'),
-            ),
-            const SizedBox(
-                height: 20), // Add spacing between button and "Sign Out" button
+            // Add spacing between button and "Sign Out" button
             ElevatedButton(
               onPressed: signOut,
               child: const Text('Sign Out'),
@@ -164,19 +184,100 @@ class _MyHomePageState extends State<MyHomePage> {
           ],
         ),
       );
+    } else if (userEmail != null) {
+      // User logged in using the API
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            const Icon(
+              Icons.people_alt_outlined, // Display a contact icon for API login
+              size: 48.0,
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            Text(' ${userEmail ?? ''}'), // Display userEmail
+            const SizedBox(
+              height: 20,
+            ),
+            ElevatedButton(
+              onPressed: () {
+                // Navigate to FormPageOne using Navigator
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => FormPageOne(
+                      email: userEmail,
+                      userName:
+                          '', // You can set a default user name here if needed
+                    ),
+                  ),
+                );
+              },
+              child: const Text('Go to FormPageOne'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                // Navigate to FormPageOne using Navigator
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => Dashboard(
+                            email: userEmail,
+                          )),
+                );
+              },
+              child: const Text('Dashboard'),
+            )
+            // ... Rest of your code ...
+          ],
+        ),
+      );
     } else {
       return Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center, // centering the content
+          mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             const Text(
               'Sign In to continue',
               style: TextStyle(fontSize: 24),
             ),
-            const SizedBox(height: 20), // Add spacing between text and button
+            const SizedBox(height: 20),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: TextFormField(
+                controller: _emailController,
+                decoration: const InputDecoration(
+                  labelText: 'Email',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: TextFormField(
+                obscureText: true,
+                controller: _passwordController,
+                decoration: const InputDecoration(
+                  labelText: 'Password',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
             ElevatedButton(
               onPressed: signIn,
-              child: const Text('Sign In'),
+              child: Text('Continue with Google'),
+            ),
+            const SizedBox(height: 10),
+            ElevatedButton(
+              onPressed: () {
+                login(_emailController.text.toString(),
+                    _passwordController.text.toString());
+              },
+              child: const Text('login'),
             ),
           ],
         ),
@@ -184,12 +285,39 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-//sign out logic
+  //logic to login through email and password using API and http requests
+  void login(String email, String password) async {
+    try {
+      Response response = await post(
+        Uri.parse('https://reqres.in/api/login'),
+        body: {'email': email, 'password': password},
+      );
+      if (response.statusCode == 200) {
+        var data = jsonDecode(response.body.toString());
+        print(data);
+        userEmail = email;
+        print(email);
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => Dashboard(
+                    email: email,
+                  )),
+        );
+      } else {
+        print('Request failed with status code: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error: $e');
+    }
+  }
+
+  //sign out logic
   void signOut() {
     _googleSignIn.disconnect();
   }
 
-//sign in logic with google account
+  //sign in logic with google account
   Future<void> signIn() async {
     try {
       await _googleSignIn.signIn();
