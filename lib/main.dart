@@ -37,7 +37,6 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Your App Title',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.blueGrey),
         useMaterial3: true,
       ),
       initialRoute: '/',
@@ -99,13 +98,13 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            ListTile(
-              title: Center(
-                child: GoogleUserCircleAvatar(
-                  identity: user,
+            const ListTile(
+                // title: Center(
+                //   child: GoogleUserCircleAvatar(
+                //     identity: user,
+                //   ),
+                // ),
                 ),
-              ),
-            ),
             const SizedBox(
               height: 20,
             ),
@@ -136,31 +135,6 @@ class _MyHomePageState extends State<MyHomePage> {
             const SizedBox(
               height: 20,
             ),
-            // ElevatedButton(
-            //   onPressed: () {
-            //     // Navigate to sports using Navigator
-            //     Navigator.push(
-            //       context,
-            //       MaterialPageRoute(
-            //         builder: (context) => const SportDetails(),
-            //       ),
-            //     );
-            //   },
-            //   child: const Text('Go to Fav Sport page'),
-            // ),
-            // const SizedBox(height: 20),
-            // ElevatedButton(
-            //   onPressed: () {
-            //     // Navigate to http requests using Navigator
-            //     Navigator.push(
-            //       context,
-            //       MaterialPageRoute(
-            //         builder: (context) => const HttpCrud(),
-            //       ),
-            //     );
-            //   },
-            //   child: const Text('http requests'),
-            // ),
             ElevatedButton(
               onPressed: () {
                 userEmail = user.email;
