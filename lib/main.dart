@@ -42,9 +42,9 @@ class MyApp extends StatelessWidget {
       initialRoute: '/',
       routes: {
         '/': (context) => MyHomePage(),
-        MyAppRouteConstants.formRouteName: (context) => FormPageOne(),
-        MyAppRouteConstants.sportsRouteName: (context) => SportDetails(),
-        MyAppRouteConstants.httpRouteName: (context) => HttpCrud(),
+        MyAppRouteConstants.formRouteName: (context) => const FormPageOne(),
+        MyAppRouteConstants.sportsRouteName: (context) => const SportDetails(),
+        MyAppRouteConstants.httpRouteName: (context) => const HttpCrud(),
       },
     );
   }

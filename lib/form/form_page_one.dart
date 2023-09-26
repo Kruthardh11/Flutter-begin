@@ -1,6 +1,8 @@
+import 'package:firebase_integrate/dashboard/dashboard.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:go_router/go_router.dart';
 
 class FormPageOne extends StatefulWidget {
   final String? userName;
@@ -193,21 +195,32 @@ class _FormPageOneState extends State<FormPageOne> {
                         'gender': _genderController.text,
                       });
                       // Show success SnackBar
-                      Get.snackbar(
-                        "Success",
-                        "Your information has been logged",
-                        snackPosition: SnackPosition.BOTTOM,
-                        backgroundColor: Colors.green.withOpacity(0.2),
-                        colorText: Colors.green,
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text("Your information has been logged"),
+                          backgroundColor: Colors.green.withOpacity(0.2),
+                          duration: const Duration(
+                              seconds: 3), // Adjust the duration as needed
+                        ),
+                      );
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(
+                          builder: (context) => Dashboard(
+                              email:
+                                  _userEmail), // Replace 'Dashboard' with your actual widget
+                        ),
                       );
                     } catch (error) {
                       // Show error SnackBar
-                      Get.snackbar(
-                        "Failed",
-                        "Some problem occurred",
-                        snackPosition: SnackPosition.BOTTOM,
-                        backgroundColor: Colors.red.withOpacity(0.2),
-                        colorText: Colors.black,
+                      print(error);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                              "Some problem occurred: $error"), // Include the error message
+                          backgroundColor: Colors.red.withOpacity(0.2),
+                          duration: const Duration(
+                              seconds: 3), // Adjust the duration as needed
+                        ),
                       );
                     }
                   }

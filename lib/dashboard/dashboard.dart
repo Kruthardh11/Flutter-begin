@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:firebase_integrate/dashboard/graphs.dart';
 import 'package:firebase_integrate/dashboard/wearther_card.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -175,6 +176,7 @@ class _DashboardState extends State<Dashboard> {
               temperature: temperature,
               windSpeed: windSpeed,
             ),
+            const Graphs(),
           ],
         ),
       ),
@@ -209,7 +211,7 @@ class _DashboardState extends State<Dashboard> {
 
         if (dataForTargetHour != null) {
           // Now, 'dataForTargetHour' contains the values for the current hour
-          print('Values for Current Hour ($targetHour:00): $dataForTargetHour');
+          print('Values recieved');
           // Call the `setState` method to update the UI with the weather data
           setState(() {
             this.dataForTargetHour = dataForTargetHour;
