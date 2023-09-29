@@ -162,12 +162,10 @@ class _DashboardState extends State<Dashboard> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                Text(
-                    'Latitude: ${latitude?.toStringAsFixed(2) ?? "Fetching..."}'),
+                Text('Latitude: ${latitude.toStringAsFixed(2)}'),
                 const SizedBox(
                     width: 16), // Add spacing between latitude and longitude
-                Text(
-                    'Longitude: ${longitude?.toStringAsFixed(2) ?? "Fetching..."}'),
+                Text('Longitude: ${longitude.toStringAsFixed(2)}'),
               ],
             ),
             const SizedBox(height: 16), // Add spacing below latitude/longitude

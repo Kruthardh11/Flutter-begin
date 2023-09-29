@@ -1,8 +1,17 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_integrate/crud/sport_model.dart';
 import 'package:flutter/material.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:hive/hive.dart';
+import 'package:path_provider/path_provider.dart' as path_provider;
 
 class SportDetails extends StatefulWidget {
-  const SportDetails({Key? key}) : super(key: key);
+  //final Box<SportModel> sportsBox;
+
+  const SportDetails({
+    Key? key,
+  }) : super(key: key);
 
   @override
   _SportDetailsState createState() => _SportDetailsState();
@@ -14,9 +23,27 @@ class _SportDetailsState extends State<SportDetails> {
   final TextEditingController _playerController = TextEditingController();
   final TextEditingController _teamController = TextEditingController();
 
+  late Stream<ConnectivityResult> connectivityStream;
+  bool isOnline = false;
+
   //creating a firebase instance referring a particular collection
   final CollectionReference _products =
       FirebaseFirestore.instance.collection('favsport');
+
+  final sportsInfo =
+      Hive.box<SportModel>('sports'); // Access the box with the correct type
+
+  @override
+  void initState() {
+    super.initState();
+    connectivityStream = Connectivity().onConnectivityChanged;
+    connectivityStream.listen((ConnectivityResult result) {
+      setState(() {
+        isOnline = (result == ConnectivityResult.mobile ||
+            result == ConnectivityResult.wifi);
+      });
+    });
+  }
 
   // Show a modal bottom sheet for creating a new product or editing an existing one.
   Future<void> _create([DocumentSnapshot? documentSnapshot]) async {
@@ -58,9 +85,18 @@ class _SportDetailsState extends State<SportDetails> {
                     final String player = _playerController.text;
                     final String team = _teamController.text;
 
-                    await _products
-                        .add({"name": name, "player": player, "team": team});
-
+                    if (isOnline) {
+                      await _products
+                          .add({"name": name, "player": player, "team": team});
+                    } else {
+                      sportsInfo.put(
+                        'key_${_nameController.text}',
+                        SportModel(name: name, player: player, team: team),
+                      );
+                      final path = sportsInfo.path;
+                      print("offline data logged");
+                      print(path);
+                    }
                     _nameController.text = '';
                     _playerController.text = '';
                     _teamController.text = '';
@@ -148,61 +184,104 @@ class _SportDetailsState extends State<SportDetails> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          title: const Center(child: Text('Firebase Firestore')),
-        ),
-        //stream builder to do the changes in real time
-        body: StreamBuilder(
-          stream: _products.snapshots(),
-          builder: (context, AsyncSnapshot<QuerySnapshot> streamSnapshot) {
-            if (streamSnapshot.hasData) {
-              return ListView.builder(
-                itemCount: streamSnapshot.data!.docs.length,
-                itemBuilder: (context, index) {
-                  final DocumentSnapshot documentSnapshot =
-                      streamSnapshot.data!.docs[index];
-                  return Card(
-                    margin: const EdgeInsets.all(10),
-                    child: ListTile(
-                      title: Text(documentSnapshot['name']),
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Player: ${documentSnapshot['player']}'),
-                          Text('Team: ${documentSnapshot['team']}'),
-                        ],
-                      ),
-                      trailing: SizedBox(
-                        width: 100,
-                        child: Row(
-                          children: [
-                            IconButton(
-                                icon: const Icon(Icons.edit),
-                                onPressed: () => _update(documentSnapshot)),
-                            IconButton(
-                                icon: const Icon(Icons.delete),
-                                onPressed: () => _delete(documentSnapshot.id)),
-                          ],
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              );
-            }
+    return StreamBuilder(
+        stream: connectivityStream,
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            // Update the isOnline variable based on the latest connectivity result
+            isOnline = (snapshot.data == ConnectivityResult.mobile ||
+                snapshot.data == ConnectivityResult.wifi);
+          }
+          if (isOnline) {
+            return Scaffold(
+                appBar: AppBar(
+                  title: Center(child: Text(isOnline ? "Online" : "Offline")),
+                ),
+                //stream builder to do the changes in real time
+                body: StreamBuilder(
+                  stream: _products.snapshots(),
+                  builder:
+                      (context, AsyncSnapshot<QuerySnapshot> streamSnapshot) {
+                    if (streamSnapshot.hasData) {
+                      return ListView.builder(
+                        itemCount: streamSnapshot.data!.docs.length,
+                        itemBuilder: (context, index) {
+                          final DocumentSnapshot documentSnapshot =
+                              streamSnapshot.data!.docs[index];
+                          return Card(
+                            margin: const EdgeInsets.all(10),
+                            child: ListTile(
+                              title: Text(documentSnapshot['name']),
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('Player: ${documentSnapshot['player']}'),
+                                  Text('Team: ${documentSnapshot['team']}'),
+                                ],
+                              ),
+                              trailing: SizedBox(
+                                width: 100,
+                                child: Row(
+                                  children: [
+                                    IconButton(
+                                        icon: const Icon(Icons.edit),
+                                        onPressed: () =>
+                                            _update(documentSnapshot)),
+                                    IconButton(
+                                        icon: const Icon(Icons.delete),
+                                        onPressed: () =>
+                                            _delete(documentSnapshot.id)),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    }
 
-            return const Center(
-              child: CircularProgressIndicator(),
+                    return const Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  },
+                ),
+                // Add new product
+                floatingActionButton: FloatingActionButton(
+                  onPressed: () => _create(),
+                  child: const Icon(Icons.add),
+                ),
+                floatingActionButtonLocation:
+                    FloatingActionButtonLocation.centerFloat);
+          } else {
+            return Scaffold(
+              appBar: AppBar(
+                title: Center(child: Text(isOnline ? "Online" : "Offline")),
+              ),
+              body: ListView.builder(
+                  itemCount: sportsInfo.length,
+                  itemBuilder: ((context, index) {
+                    SportModel? sportModel = sportsInfo.getAt(index);
+                    return ListTile(
+                      title: Text(sportModel!.name),
+                      subtitle: Text(sportModel.player),
+                      trailing: Text("Team :${sportModel.team}"),
+                      leading: IconButton(
+                          onPressed: () {
+                            setState(() {
+                              sportsInfo.deleteAt(index);
+                              print("Deleted!!");
+                            });
+                          },
+                          icon: const Icon(Icons.remove)),
+                    );
+                  })),
+              floatingActionButton: FloatingActionButton(
+                onPressed: () => _create(),
+                child: const Icon(Icons.add),
+              ),
             );
-          },
-        ),
-        // Add new product
-        floatingActionButton: FloatingActionButton(
-          onPressed: () => _create(),
-          child: const Icon(Icons.add),
-        ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat);
+          }
+        });
   }
 }
 
