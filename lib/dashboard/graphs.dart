@@ -1,6 +1,8 @@
+import 'package:firebase_integrate/crud/sports_info.dart';
 import 'package:firebase_integrate/dashboard/pie_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 class Graphs extends StatefulWidget {
   const Graphs({super.key});
@@ -17,23 +19,19 @@ class _GraphsState extends State<Graphs> {
   @override
   void initState() {
     super.initState();
-    getData();
+    //getData();
+    setupRealTimeListener();
   }
 
-  Future<void> getData() async {
-    try {
-      //query the collection
-      QuerySnapshot querySnapshot = await users.get();
-      favSportCount = {};
+  void setupRealTimeListener() {
+    users.snapshots().listen((QuerySnapshot snapshot) {
+      // Create a temporary variable to update favSportCount
+      Map<String, int> tempFavSportCount = {};
 
-      for (QueryDocumentSnapshot documentSnapshot in querySnapshot.docs) {
-        //print('Document ID: ${documentSnapshot.id}');
-        //print('Data: ${documentSnapshot.data()}');
+      for (QueryDocumentSnapshot documentSnapshot in snapshot.docs) {
         List<String> favSportsList = [];
-
         List<dynamic>? favSports = documentSnapshot['favSport'];
 
-        // If favSports is not null, iterate through it and add values to the list
         if (favSports != null) {
           for (dynamic sport in favSports) {
             if (sport is String) {
@@ -42,29 +40,30 @@ class _GraphsState extends State<Graphs> {
           }
         }
 
-        //count the occurences of each sport
         for (String sport in favSportsList) {
-          if (favSportCount.containsKey(sport)) {
-            favSportCount[sport] = (favSportCount[sport] ?? 0) + 1;
+          if (tempFavSportCount.containsKey(sport)) {
+            tempFavSportCount[sport] = (tempFavSportCount[sport] ?? 0) + 1;
           } else {
-            favSportCount[sport] = 1;
+            tempFavSportCount[sport] = 1;
           }
         }
       }
-      print("$favSportsList");
-      print("the count goes : $favSportCount");
-    } catch (e) {
-      print('Error retrieving data: $e');
-    }
 
-    //iterate through the document to access the data
+      // Update favSportCount with the new data
+      setState(() {
+        favSportCount = tempFavSportCount;
+      });
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        _buildPieChart(),
+        if (favSportCount.isEmpty) // Check if favSportCount is empty
+          const CircularProgressIndicator()
+        else
+          _buildPieChart(),
       ],
     );
   }

@@ -3,11 +3,11 @@ import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_integrate/Controllers/online_status.dart';
-import 'package:firebase_integrate/crud/sport_details.dart';
-import 'package:firebase_integrate/crud/sport_model.dart';
 import 'package:firebase_integrate/crud/sports_info.dart';
 import 'package:firebase_integrate/dashboard/dashboard.dart';
+import 'package:firebase_integrate/form/form_model.dart';
 import 'package:firebase_integrate/form/form_page_one.dart';
+import 'package:firebase_integrate/maps/main_page.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart';
@@ -25,9 +25,10 @@ Future<void> main() async {
   );
   //Initializing Hive DataBase for offline/local storage of data
   await Hive.initFlutter();
-  Hive.registerAdapter(SportModelAdapter()); // Register your adapter
-  sportsInfo = await Hive.openBox<SportModel>(
-      'sports'); // Open the box and specify its type
+// Register your adapter
+  // Open the box and specify its type
+  Hive.registerAdapter(FormModelAdapter());
+  formData = await Hive.openBox<FormModel>('formData');
   // Initialize Firebase without options
   runApp(const MyApp());
 }
@@ -126,19 +127,16 @@ class _MyHomePageState extends State<MyHomePage> {
                 Text('Connection Status: ${isOnline ? "Online" : "Offline"}'),
                 ElevatedButton(
                   onPressed: () {
-                    // Navigate to FormPageOne using Navigator
-                    //String userEmail = user.email;
-                    //String userDisplayName = user.displayName ?? '';
+                    //Navigate to FormPageOne using Navigator
+                    String userEmail = user.email;
+                    String userDisplayName = user.displayName ?? '';
                     Navigator.push(
                       context,
-                      // MaterialPageRoute(
-                      //   builder: (context) => FormPageOne(
-                      //     email: userEmail,
-                      //     userName: userDisplayName,
-                      //   ),
-                      // ),
                       MaterialPageRoute(
-                        builder: (context) => const SportDetails(),
+                        builder: (context) => FormPageOne(
+                          email: userEmail,
+                          userName: userDisplayName,
+                        ),
                       ),
                     );
                   },
@@ -162,6 +160,16 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: const Text('Dashboard'),
                 ),
                 const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () {
+                    // Navigate to FormPageOne using Navigator
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const MainPage()),
+                    );
+                  },
+                  child: const Text('map'),
+                ),
                 // Add spacing between button and "Sign Out" button
                 ElevatedButton(
                   onPressed: signOut,
@@ -217,8 +225,17 @@ class _MyHomePageState extends State<MyHomePage> {
                     );
                   },
                   child: const Text('Dashboard'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    // Navigate to FormPageOne using Navigator
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const MainPage()),
+                    );
+                  },
+                  child: const Text('map'),
                 )
-                // ... Rest of your code ...
               ],
             ),
           );

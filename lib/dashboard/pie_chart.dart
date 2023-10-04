@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fl_chart/fl_chart.dart';
+import 'package:pie_chart/pie_chart.dart';
 
 class PieChartWidget extends StatelessWidget {
   final Map<String, int> data;
@@ -8,53 +8,49 @@ class PieChartWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AspectRatio(
-      aspectRatio: 1.3,
-      child: PieChart(
-        PieChartData(
-          sections: generatePieChartSections(data),
-          borderData: FlBorderData(show: false),
-          centerSpaceRadius: 40,
-          sectionsSpace: 0,
-        ),
-      ),
-    );
-  }
-
-  List<PieChartSectionData> generatePieChartSections(Map<String, int> data) {
-    List<PieChartSectionData> sections = [];
-
-    // Define a list of predefined colors
-    List<Color> sectionColors = [
-      Colors.red,
-      Colors.green,
-      Colors.blue,
-      Colors.orange,
-      Colors.purple,
-      // Add more colors as needed
-    ];
-
-    // Loop through the data and assign colors from the predefined list
-    int colorIndex = 0;
-    data.forEach((sport, count) {
-      final double radius = 60;
-      sections.add(
-        PieChartSectionData(
-          title: '$sport\n$count',
-          radius: radius,
-          value: count.toDouble(),
-          color: sectionColors[colorIndex %
-              sectionColors.length], // Assign a color from the list
-          titleStyle: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
+    // Check if the data map is empty
+    if (data.isEmpty) {
+      // Display an empty icon or message when data is empty
+      return const Text(
+          'Synced and up to date'); // You can replace this with any desired empty icon or widget.
+    } else {
+      // Show the pie chart when data is available
+      return AspectRatio(
+        aspectRatio: 1.3,
+        child: PieChart(
+          dataMap: generatePieChartData(data),
+          animationDuration:
+              const Duration(seconds: 1), // Set animation duration
+          chartLegendSpacing: 24, // Adjust legend spacing as needed
+          chartRadius: MediaQuery.of(context).size.width / 2.5,
+          chartType: ChartType.disc, // Set chart type to disc
+          centerText: "Sport",
+          ringStrokeWidth: 24,
+          legendOptions: const LegendOptions(
+            showLegends: true,
+            legendShape: BoxShape.circle,
+            legendTextStyle: TextStyle(fontSize: 15),
+            legendPosition: LegendPosition.bottom,
+            showLegendsInRow: true,
+          ),
+          chartValuesOptions: ChartValuesOptions(
+            showChartValueBackground: false,
+            showChartValues: true,
+            showChartValuesInPercentage: true,
+            showChartValuesOutside: true,
           ),
         ),
       );
-      colorIndex++;
+    }
+  }
+
+  Map<String, double> generatePieChartData(Map<String, int> data) {
+    Map<String, double> chartData = {};
+
+    data.forEach((sport, count) {
+      chartData[sport] = count.toDouble();
     });
 
-    return sections;
+    return chartData;
   }
 }

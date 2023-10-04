@@ -1,8 +1,9 @@
-import 'package:firebase_integrate/Controllers/online_status.dart';
 import 'package:firebase_integrate/dashboard/dashboard.dart';
+import 'package:firebase_integrate/form/form_model.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 class FormPageOne extends StatefulWidget {
   final String? userName;
@@ -23,10 +24,13 @@ class _FormPageOneState extends State<FormPageOne> {
 
   // Getting the instance of the collection
   CollectionReference users = FirebaseFirestore.instance.collection('Users');
+  //getting the Hive Box for local storage
+  final formData = Hive.box<FormModel>('formData');
 
   String? _userName;
   String? _userEmail;
   late Stream<ConnectivityResult> connectivityStream;
+
   bool isOnline = false;
   final TextEditingController _ageController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -62,24 +66,22 @@ class _FormPageOneState extends State<FormPageOne> {
     _userName = widget.userName;
     _userEmail = widget.email;
     connectivityStream = Connectivity().onConnectivityChanged;
-    connectivityStream.listen((ConnectivityResult result) {
-      setState(() {
-        isOnline = (result == ConnectivityResult.mobile ||
-            result == ConnectivityResult.wifi);
-      });
+    checkConnectivity();
+  }
+
+  Future<void> checkConnectivity() async {
+    final connectivityResult = await Connectivity().checkConnectivity();
+    setState(() {
+      isOnline = (connectivityResult == ConnectivityResult.mobile ||
+          connectivityResult == ConnectivityResult.wifi);
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder(
+    return StreamBuilder<ConnectivityResult>(
         stream: connectivityStream,
         builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            // Update the isOnline variable based on the latest connectivity result
-            isOnline = (snapshot.data == ConnectivityResult.mobile ||
-                snapshot.data == ConnectivityResult.wifi);
-          }
           return Scaffold(
             appBar: AppBar(
               title: Text(isOnline ? "Online" : "Offline"),
@@ -206,6 +208,7 @@ class _FormPageOneState extends State<FormPageOne> {
                             _formKey.currentState?.save();
                             try {
                               // Process and submit the form data
+                              final timestamp = Timestamp.now();
                               await users.add({
                                 'name': _userName,
                                 'email': _userEmail,
@@ -215,12 +218,12 @@ class _FormPageOneState extends State<FormPageOne> {
                                 'password': _passwordController.text,
                                 'favSport': _favoriteSports,
                                 'gender': _genderController.text,
+                                'timestamp': timestamp,
                               });
                               // Show success SnackBar
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
-                                  content: const Text(
-                                      "Your information has been logged"),
+                                  content: const Text("Data stored ONLINE"),
                                   backgroundColor:
                                       Colors.green.withOpacity(0.2),
                                   duration: const Duration(
@@ -251,9 +254,27 @@ class _FormPageOneState extends State<FormPageOne> {
                             }
                           }
                         } else {
+                          formData.put(
+                              "key_$_ageController.",
+                              FormModel(
+                                  name: _userName!,
+                                  age: _ageController.text,
+                                  city: _cityController.text,
+                                  email: _userEmail!,
+                                  gender: _genderController.text,
+                                  favSport: _favoriteSports,
+                                  password: _passwordController.text));
+                          var path = formData.path;
+                          print(path);
+                          print("OFFLINE data logged!");
                           ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                  content: Text("You are offline, Sucker!")));
+                            SnackBar(
+                              content: const Text("Data stored offline"),
+                              backgroundColor: Colors.green.withOpacity(0.2),
+                              duration: const Duration(
+                                  seconds: 3), // Adjust the duration as needed
+                            ),
+                          );
                         }
                       },
                       child: const Text('Submit'),

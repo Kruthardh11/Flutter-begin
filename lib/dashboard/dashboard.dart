@@ -1,14 +1,20 @@
 import 'dart:convert';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_integrate/dashboard/graphs.dart';
+import 'package:firebase_integrate/dashboard/graphs_offline.dart';
 import 'package:firebase_integrate/dashboard/wearther_card.dart';
+import 'package:firebase_integrate/form/form_model.dart';
+import 'package:firebase_integrate/form/show_offline.dart';
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:geolocator/geolocator.dart';
 
 class Dashboard extends StatefulWidget {
   final String? email;
 
-  Dashboard({super.key, required this.email});
+  const Dashboard({super.key, required this.email});
 
   @override
   State<Dashboard> createState() => _DashboardState();
@@ -25,6 +31,9 @@ class _DashboardState extends State<Dashboard> {
   Map<String, dynamic> targetHourData = {};
   Map<String, dynamic> userData = {};
   Map<String, dynamic>? dataForTargetHour;
+  late Stream<ConnectivityResult> connectivityStream;
+
+  bool isOnline = false;
 
   @override
   void initState() {
@@ -35,6 +44,8 @@ class _DashboardState extends State<Dashboard> {
     getLocation();
     getCurrentHour();
     fetchWeatherData(latitude, longitude, currentHour);
+    connectivityStream = Connectivity().onConnectivityChanged;
+    checkConnectivity();
   }
 
   Future<void> getLocation() async {
@@ -99,6 +110,65 @@ class _DashboardState extends State<Dashboard> {
     }
   }
 
+  final formData = Hive.box<FormModel>('formData');
+  CollectionReference users = FirebaseFirestore.instance.collection('Users');
+  Future<void> getOfflineData() async {
+    List<FormModel> offlineData = formData.values.toList();
+    var path = formData.path;
+    print(path);
+    await syncData(offlineData);
+  }
+
+  Future<void> checkConnectivity() async {
+    final connectivityResult = await Connectivity().checkConnectivity();
+    setState(() {
+      isOnline = (connectivityResult == ConnectivityResult.mobile ||
+          connectivityResult == ConnectivityResult.wifi);
+    });
+  }
+
+  Future<void> syncData(List<FormModel> data) async {
+    // Loop through the data and send each record to Firestore
+    if (isOnline) {
+      for (FormModel form in data) {
+        try {
+          await users.add({
+            'name': form.name,
+            'email': form.email,
+            'city': form.city,
+            'age': form.age,
+            'password': form.password,
+            'gender': form.gender,
+            'favSport': form.favSport,
+          });
+          print('sending to online');
+          // If you want, you can delete the record from Hive after it's successfully sent to Firestore.
+          // formData.delete(form.key);
+        } catch (e) {
+          // Handle any errors that might occur during Firestore write operations.
+          print('Error sending data to Firestore: $e');
+        }
+      }
+      // Clear the data from Hive after successful synchronization
+      formData.clear();
+
+      // Show a snackbar to inform the user that the synchronization is complete
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Data synchronized'),
+          duration: Duration(seconds: 2), // Adjust the duration as needed
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Connect to internet'),
+          duration: Duration(seconds: 2), // Adjust the duration as needed
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final String userName = userData["user_name"] ?? " ";
@@ -126,7 +196,7 @@ class _DashboardState extends State<Dashboard> {
         ],
         elevation: 4,
       ),
-      body: Center(
+      body: SingleChildScrollView(
         child: Column(
           // mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -174,7 +244,22 @@ class _DashboardState extends State<Dashboard> {
               temperature: temperature,
               windSpeed: windSpeed,
             ),
+            const Text('Online data'),
             const Graphs(),
+            ElevatedButton(
+                onPressed: () {
+                  getOfflineData();
+                },
+                child: const Text('Sync')),
+            const Text('Offline data'),
+            const GrpahsOffline(),
+            ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pushReplacement(MaterialPageRoute(
+                    builder: (context) => const ShowOffline(),
+                  ));
+                },
+                child: const Text("offline data"))
           ],
         ),
       ),
@@ -206,21 +291,16 @@ class _DashboardState extends State<Dashboard> {
             break;
           }
         }
-
-        if (dataForTargetHour != null) {
-          // Now, 'dataForTargetHour' contains the values for the current hour
-          print('Values recieved');
-          // Call the `setState` method to update the UI with the weather data
-          setState(() {
-            this.dataForTargetHour = dataForTargetHour;
-            humidity = dataForTargetHour['humidity'] ?? 0.0; // Extract humidity
-            temperature =
-                dataForTargetHour['temperature'] ?? 0.0; // Extract temperature
-            windSpeed = dataForTargetHour['windSpeed'] ?? 0.0;
-          });
-        } else {
-          print('Data not available for Current Hour ($targetHour:00)');
-        }
+        // Now, 'dataForTargetHour' contains the values for the current hour
+        print('Values recieved');
+        // Call the `setState` method to update the UI with the weather data
+        setState(() {
+          this.dataForTargetHour = dataForTargetHour;
+          humidity = dataForTargetHour['humidity'] ?? 0.0; // Extract humidity
+          temperature =
+              dataForTargetHour['temperature'] ?? 0.0; // Extract temperature
+          windSpeed = dataForTargetHour['windSpeed'] ?? 0.0;
+        });
       } else {
         print('Request failed with status: ${response.statusCode}');
         print(response.body);
