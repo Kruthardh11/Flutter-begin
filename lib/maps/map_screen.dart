@@ -2,6 +2,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:geolocator/geolocator.dart' as geolocator;
+import 'package:location/location.dart' as location;
 
 class MapScreen extends StatefulWidget {
   const MapScreen({Key? key}) : super(key: key);
@@ -14,11 +16,6 @@ class _MapScreenState extends State<MapScreen> {
   final Completer<GoogleMapController> _controller =
       Completer<GoogleMapController>();
 
-  static const CameraPosition _kGooglePlex = CameraPosition(
-    target: LatLng(37.42796133580664, -122.085749655962),
-    zoom: 14.4746,
-  );
-
   CameraPosition _buildCameraPosition() {
     if (latitude != null && longitude != null) {
       return CameraPosition(
@@ -26,7 +23,11 @@ class _MapScreenState extends State<MapScreen> {
         zoom: 14.4746,
       );
     } else {
-      return _kGooglePlex; // Use the default camera position if location is not available yet
+      return CameraPosition(
+        target:
+            LatLng(37.42796133580664, -122.085749655962), // Default location
+        zoom: 14.4746,
+      );
     }
   }
 
@@ -40,6 +41,8 @@ class _MapScreenState extends State<MapScreen> {
   double? longitude;
   Set<Marker> markers = {};
   String? selectedMarkerCoordinates; // Store selected marker coordinates
+  geolocator.LocationAccuracy _desiredAccuracy =
+      geolocator.LocationAccuracy.best;
 
   // Function to handle map tap and add a marker
   void _onMapTapped(LatLng latLng) {
@@ -66,7 +69,8 @@ class _MapScreenState extends State<MapScreen> {
       LocationPermission permission;
       permission = await Geolocator.requestPermission();
       Position position = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.best);
+        desiredAccuracy: _desiredAccuracy,
+      );
       setState(() {
         latitude = position.latitude;
         longitude = position.longitude;
@@ -95,6 +99,7 @@ class _MapScreenState extends State<MapScreen> {
               },
               markers: markers,
               onTap: _onMapTapped,
+              myLocationEnabled: true, // Enable the MyLocationButton
             ),
           ),
           Padding(
