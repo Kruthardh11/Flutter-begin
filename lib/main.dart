@@ -21,6 +21,7 @@ Future<void> main() async {
       appId: '1:625310299583:android:a96427e5ce98bf3857dd0a',
       messagingSenderId: '625310299583',
       projectId: 'flutterdb-1a2a7',
+      storageBucket: 'gs://flutterdb-1a2a7.appspot.com',
     ),
   );
   //Initializing Hive DataBase for offline/local storage of data

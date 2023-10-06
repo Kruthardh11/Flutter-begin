@@ -1,4 +1,5 @@
-import 'package:firebase_integrate/maps/map_screen.dart';
+import 'package:firebase_integrate/maps/camera_page.dart';
+//import 'package:firebase_integrate/maps/map_screen.dart';
 import 'package:flutter/material.dart';
 
 class MainPage extends StatefulWidget {
@@ -11,8 +12,11 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> {
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: MapScreen(),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Map/camera'),
+      ),
+      body: CameraPage(),
     );
   }
 }

@@ -1,9 +1,12 @@
+import 'dart:io';
 import 'package:firebase_integrate/dashboard/dashboard.dart';
 import 'package:firebase_integrate/form/form_model.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:image_picker/image_picker.dart';
 
 class FormPageOne extends StatefulWidget {
   final String? userName;
@@ -75,6 +78,63 @@ class _FormPageOneState extends State<FormPageOne> {
       isOnline = (connectivityResult == ConnectivityResult.mobile ||
           connectivityResult == ConnectivityResult.wifi);
     });
+  }
+
+  File? _selectedImage;
+  String? imageURL;
+  Future<void> getImageGallery() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      // The user picked an image.
+      // You can use pickedFile.path to get the file path of the selected image.
+      // For example, to display the selected image, you can use an Image widget:
+      // You can also upload or process the image here.
+
+      setState(() {
+        _selectedImage = File(pickedFile.path);
+      });
+    } else {
+      print("BAlls");
+    }
+  }
+
+  Future<void> _captureImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.camera);
+
+    if (pickedFile != null) {
+      // The user captured a new image.
+      // You can use pickedFile.path to get the file path of the captured image.
+      // For example, to display the captured image, you can use an Image widget:
+      // You can also upload or process the imagse here.
+      setState(() {
+        _selectedImage = File(pickedFile.path);
+      });
+
+      print(_selectedImage);
+    } else {
+      // The user canceled capturing an image.
+      print("Balls");
+    }
+  }
+
+  Future<void> uploadImageToFirebase(File imageFile) async {
+    try {
+      var timestamp = DateTime.now().millisecondsSinceEpoch;
+      var path = 'files/image_$timestamp.jpg';
+      final file = File(_selectedImage!.path);
+      final ref = FirebaseStorage.instance.ref().child(path);
+      final uploadTask = ref.putFile(file);
+      final snapshot = await uploadTask.whenComplete(() {});
+
+      final urlDownload = await snapshot.ref.getDownloadURL();
+      imageURL = urlDownload;
+      print(urlDownload);
+    } catch (e) {
+      print('Error uploading image to Firebase Storage: $e');
+    }
   }
 
   @override
@@ -200,6 +260,33 @@ class _FormPageOneState extends State<FormPageOne> {
                           .toList(),
                     ),
                     const SizedBox(height: 16.0),
+
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.photo_library),
+                          onPressed: getImageGallery,
+                          tooltip: 'Pick Image from Gallery',
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.camera_alt),
+                          onPressed: _captureImage,
+                          tooltip: 'Capture Image from Camera',
+                        ),
+                      ],
+                    ),
+                    Container(
+                      margin: const EdgeInsets.all(16.0),
+                      child: _selectedImage != null
+                          ? Image.file(
+                              _selectedImage!,
+                              height: 350,
+                              width: 350,
+                            )
+                          // Display the selected image
+                          : const Text('No image selected'),
+                    ),
                     ElevatedButton(
                       onPressed: () async {
                         if (isOnline) {
@@ -208,6 +295,7 @@ class _FormPageOneState extends State<FormPageOne> {
                             _formKey.currentState?.save();
                             try {
                               // Process and submit the form data
+                              await uploadImageToFirebase(_selectedImage!);
                               final timestamp = Timestamp.now();
                               await users.add({
                                 'name': _userName,
@@ -219,7 +307,9 @@ class _FormPageOneState extends State<FormPageOne> {
                                 'favSport': _favoriteSports,
                                 'gender': _genderController.text,
                                 'timestamp': timestamp,
+                                'imageURL': imageURL,
                               });
+
                               // Show success SnackBar
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
