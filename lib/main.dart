@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_integrate/Controllers/online_status.dart';
+import 'package:firebase_integrate/Google%20lens%20clone/main_lens.dart';
 import 'package:firebase_integrate/crud/sports_info.dart';
 import 'package:firebase_integrate/dashboard/dashboard.dart';
 import 'package:firebase_integrate/form/form_model.dart';
@@ -167,6 +168,17 @@ class _MyHomePageState extends State<MyHomePage> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => const MainPage()),
+                    );
+                  },
+                  child: const Text('map'),
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () {
+                    // Navigate to FormPageOne using Navigator
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const MainLens()),
                     );
                   },
                   child: const Text('map'),

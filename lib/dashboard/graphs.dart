@@ -1,8 +1,6 @@
-import 'package:firebase_integrate/crud/sports_info.dart';
 import 'package:firebase_integrate/dashboard/pie_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 
 class Graphs extends StatefulWidget {
   const Graphs({super.key});
