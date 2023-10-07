@@ -1,3 +1,5 @@
+import 'package:firebase_integrate/Google%20lens%20clone/image_lebelling.dart';
+import 'package:firebase_integrate/Google%20lens%20clone/text_recogniser.dart';
 import 'package:flutter/material.dart';
 
 class MainLens extends StatefulWidget {
@@ -8,7 +10,6 @@ class MainLens extends StatefulWidget {
 }
 
 class _MainLensState extends State<MainLens> {
-  void getImageGallery() async {}
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -20,9 +21,7 @@ class _MainLensState extends State<MainLens> {
               style: TextStyle(color: Color.fromARGB(255, 116, 166, 251)),
             )),
       ),
-      body: Column(
-        children: [],
-      ),
+      body: const ImageLabelling(),
     );
   }
 }

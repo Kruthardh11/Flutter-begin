@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_ml_kit/google_ml_kit.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:flutter/services.dart';
 
 class TextRecogniser extends StatefulWidget {
   const TextRecogniser({super.key});
@@ -24,6 +25,7 @@ class _TextRecogniserState extends State<TextRecogniser> {
         imageFile = pickedImage;
         setState(() {});
         _getRecognisedText(pickedImage);
+        textScanning = false;
       }
     } catch (e) {
       textScanning = false;
@@ -32,7 +34,22 @@ class _TextRecogniserState extends State<TextRecogniser> {
     }
   }
 
-  Future<void> _captureImage() async {}
+  Future<void> _captureImage() async {
+    try {
+      final capturedImage =
+          await ImagePicker().pickImage(source: ImageSource.camera);
+      if (capturedImage != null) {
+        textScanning = true;
+        imageFile = capturedImage;
+        setState(() {});
+        _getRecognisedText(capturedImage);
+      }
+    } catch (e) {
+      textScanning = false;
+      imageFile = null;
+      setState(() {});
+    }
+  }
 
   Future<void> _getRecognisedText(XFile image) async {
     final inputImage = InputImage.fromFilePath(image.path);
@@ -45,8 +62,17 @@ class _TextRecogniserState extends State<TextRecogniser> {
         scannedText = scannedText + line.text + "\n";
       }
     }
-    textScanning = true;
+    textScanning = false;
     setState(() {});
+  }
+
+  void _copyToClipboard() {
+    Clipboard.setData(ClipboardData(text: scannedText));
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Text copied to clipboard'),
+      ),
+    );
   }
 
   @override
@@ -69,8 +95,11 @@ class _TextRecogniserState extends State<TextRecogniser> {
       else if (textScanning)
         const CircularProgressIndicator()
       else if (imageFile != null)
-        Image.file(File(
-            imageFile!.path)), // Show the selected image when it's not null
+        Expanded(
+          child: SingleChildScrollView(
+              padding: EdgeInsets.all(16),
+              child: Image.file(File(imageFile!.path))),
+        ), // Show the selected image when it's not null
       Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -86,16 +115,19 @@ class _TextRecogniserState extends State<TextRecogniser> {
           ),
         ],
       ),
-      // ElevatedButton(
-      //   style: ElevatedButton.styleFrom(
-      //     backgroundColor: Colors.red, // background
-      //     foregroundColor: Colors.white, // foreground
-      //   ),
-      //   onPressed: () {
-      //     _getRecognisedText(imageFile!);
-      //   },
-      //   child: Text('Get text'),
-      // )
+      SizedBox(height: 20),
+      Expanded(
+        child: SingleChildScrollView(
+          padding: EdgeInsets.all(16),
+          child: GestureDetector(
+            onLongPress: _copyToClipboard,
+            child: Text(
+              scannedText,
+              style: TextStyle(fontSize: 16),
+            ),
+          ),
+        ),
+      ),
     ]);
   }
 }

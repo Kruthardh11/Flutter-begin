@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart' as geolocator;
-import 'package:location/location.dart' as location;
 
 class MapScreen extends StatefulWidget {
   const MapScreen({Key? key}) : super(key: key);
@@ -83,25 +82,22 @@ class _MapScreenState extends State<MapScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Map Screen"),
-        backgroundColor: Colors.blue,
-      ),
       body: Column(
         children: [
           Container(
-            height: 300, // Reduce the map height
-            child: GoogleMap(
-              mapType: MapType.hybrid,
-              initialCameraPosition: _buildCameraPosition(),
-              onMapCreated: (GoogleMapController controller) {
-                _controller.complete(controller);
-              },
-              markers: markers,
-              onTap: _onMapTapped,
-              myLocationEnabled: true, // Enable the MyLocationButton
-            ),
-          ),
+              height: 200, // Reduce the map height
+              child: Expanded(
+                child: GoogleMap(
+                  mapType: MapType.hybrid,
+                  initialCameraPosition: _buildCameraPosition(),
+                  onMapCreated: (GoogleMapController controller) {
+                    _controller.complete(controller);
+                  },
+                  markers: markers,
+                  onTap: _onMapTapped,
+                  myLocationEnabled: true, // Enable the MyLocationButton
+                ),
+              )),
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Text(

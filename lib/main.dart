@@ -181,7 +181,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       MaterialPageRoute(builder: (context) => const MainLens()),
                     );
                   },
-                  child: const Text('map'),
+                  child: const Text('Google Lens'),
                 ),
                 // Add spacing between button and "Sign Out" button
                 ElevatedButton(

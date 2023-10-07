@@ -6,6 +6,7 @@ import 'package:firebase_integrate/dashboard/graphs_offline.dart';
 import 'package:firebase_integrate/dashboard/wearther_card.dart';
 import 'package:firebase_integrate/form/form_model.dart';
 import 'package:firebase_integrate/form/show_offline.dart';
+import 'package:firebase_integrate/maps/images.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:http/http.dart' as http;
@@ -259,7 +260,17 @@ class _DashboardState extends State<Dashboard> {
                     builder: (context) => const ShowOffline(),
                   ));
                 },
-                child: const Text("offline data"))
+                child: const Text("offline data")),
+            const SizedBox(
+              height: 20,
+            ),
+            ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pushReplacement(MaterialPageRoute(
+                    builder: (context) => const Images(),
+                  ));
+                },
+                child: Text('images'))
           ],
         ),
       ),
