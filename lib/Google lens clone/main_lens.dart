@@ -1,4 +1,5 @@
 import 'package:firebase_integrate/Google%20lens%20clone/image_lebelling.dart';
+import 'package:firebase_integrate/Google%20lens%20clone/object_detector.dart';
 import 'package:firebase_integrate/Google%20lens%20clone/text_recogniser.dart';
 import 'package:flutter/material.dart';
 
@@ -21,7 +22,7 @@ class _MainLensState extends State<MainLens> {
               style: TextStyle(color: Color.fromARGB(255, 116, 166, 251)),
             )),
       ),
-      body: const ImageLabelling(),
+      body: ImageLabelling(),
     );
   }
 }
