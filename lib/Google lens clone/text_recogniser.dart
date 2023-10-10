@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_ml_kit/google_ml_kit.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class TextRecogniser extends StatefulWidget {
   const TextRecogniser({super.key});
@@ -83,6 +84,20 @@ class _TextRecogniserState extends State<TextRecogniser> {
     );
   }
 
+  late Uri searchResultsUrl;
+  bool searchResultsVisible = false;
+
+  Future<void> _performGoogleSearch() async {
+    final searchQuery = scannedText;
+
+    final encodedQuery = Uri.encodeComponent(searchQuery);
+
+    // Construct the Google search URL
+    final url = 'https://www.google.com/search?q=$encodedQuery';
+    searchResultsUrl = Uri.parse(url);
+    print(searchResultsUrl);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(children: [
@@ -119,6 +134,13 @@ class _TextRecogniserState extends State<TextRecogniser> {
           IconButton(
             icon: const Icon(Icons.camera_alt),
             onPressed: _captureImage,
+            tooltip: 'Capture Image from Camera',
+          ),
+          IconButton(
+            icon: const Icon(Icons.search),
+            onPressed: () {
+              launchUrl(searchResultsUrl, mode: LaunchMode.inAppWebView);
+            },
             tooltip: 'Capture Image from Camera',
           ),
         ],
