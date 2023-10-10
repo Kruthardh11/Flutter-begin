@@ -16,6 +16,7 @@ class _TextRecogniserState extends State<TextRecogniser> {
   XFile? imageFile;
   String scannedText = "";
 
+//function to get image from gallery
   Future<void> _getImage() async {
     try {
       final pickedImage =
@@ -34,6 +35,7 @@ class _TextRecogniserState extends State<TextRecogniser> {
     }
   }
 
+  //function to capture image from camera
   Future<void> _captureImage() async {
     try {
       final capturedImage =
@@ -52,11 +54,16 @@ class _TextRecogniserState extends State<TextRecogniser> {
   }
 
   Future<void> _getRecognisedText(XFile image) async {
+    //get the image ny accessing it's path
     final inputImage = InputImage.fromFilePath(image.path);
+    //Get the text recognizer object from Google ml kit
     final textDetector = GoogleMlKit.vision.textRecognizer();
+    //use the recognizer object to recognize process the image
     RecognizedText recognizedText = await textDetector.processImage(inputImage);
+    //close the recognizer after it's done to save memory space
     await textDetector.close();
     scannedText = "";
+    //assign the recognizded text to a variable
     for (TextBlock block in recognizedText.blocks) {
       for (TextLine line in block.lines) {
         scannedText = scannedText + line.text + "\n";
@@ -66,6 +73,7 @@ class _TextRecogniserState extends State<TextRecogniser> {
     setState(() {});
   }
 
+//function to copy the recognized text to keyboard
   void _copyToClipboard() {
     Clipboard.setData(ClipboardData(text: scannedText));
     ScaffoldMessenger.of(context).showSnackBar(

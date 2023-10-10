@@ -108,24 +108,33 @@ class _FormPageOneState extends State<FormPageOne> {
       // The user captured a new image.
       // You can use pickedFile.path to get the file path of the captured image.
       // For example, to display the captured image, you can use an Image widget:
-      // You can also upload or process the imagse here.
-      setState(() {
-        _selectedImage = File(pickedFile.path);
-      });
+      // You can also upload or process the image here.
+      final selectedImageFile = File(pickedFile.path);
+
+      if (mounted) {
+        setState(() {
+          _selectedImage = selectedImageFile;
+        });
+      }
 
       print(_selectedImage);
     } else {
       // The user canceled capturing an image.
-      print("Balls");
+      print("Image capture canceled");
     }
   }
 
   Future<void> uploadImageToFirebase(File imageFile) async {
     try {
+      //getting the timestamp to give the file a unique name
       var timestamp = DateTime.now().millisecondsSinceEpoch;
+      //defining the path to the stored image
       var path = 'files/image_$timestamp.jpg';
+      //getting the file that needs to be uploaded
       final file = File(_selectedImage!.path);
+      //getting the instance of folder in firebase
       final ref = FirebaseStorage.instance.ref().child(path);
+      //uploading the image
       final uploadTask = ref.putFile(file);
       final snapshot = await uploadTask.whenComplete(() {});
 
@@ -135,6 +144,12 @@ class _FormPageOneState extends State<FormPageOne> {
     } catch (e) {
       print('Error uploading image to Firebase Storage: $e');
     }
+  }
+
+  Future<void> _saveImageToHive(XFile imageFile) async {
+    final bytes = await File(imageFile.path).readAsBytes();
+    final box = await Hive.openBox('images');
+    await box.put('my_image_key', bytes);
   }
 
   @override

@@ -1,5 +1,3 @@
-import 'package:firebase_integrate/maps/camera_page.dart';
-import 'package:firebase_integrate/maps/images.dart';
 import 'package:firebase_integrate/maps/map_screen.dart';
 //import 'package:firebase_integrate/maps/map_screen.dart';
 import 'package:flutter/material.dart';

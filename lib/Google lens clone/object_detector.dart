@@ -4,6 +4,9 @@ import 'package:google_ml_kit/google_ml_kit.dart';
 import 'package:image_picker/image_picker.dart';
 
 class TextRecognitionAndTranslationWidget extends StatefulWidget {
+  // Add a named key parameter to the constructor
+  const TextRecognitionAndTranslationWidget({Key? key}) : super(key: key);
+
   @override
   _TextRecognitionAndTranslationWidgetState createState() =>
       _TextRecognitionAndTranslationWidgetState();
@@ -45,7 +48,7 @@ class _TextRecognitionAndTranslationWidgetState
       }
 
       final translatedText = await translateText(recognizedText);
-      print("printed text sucker \n $translatedText");
+      print("printed text sucker \n$translatedText");
       return translatedText;
     } catch (e) {
       print('Error: $e');
@@ -58,8 +61,17 @@ class _TextRecognitionAndTranslationWidgetState
       final textRecognizer = TextRecognizer();
       final recognizedText = await textRecognizer.processImage(inputImage);
       textRecognizer.close();
+
+      setState(() {
+        this.recognizedText = recognizedText.text;
+      });
+      print("Recognized text:\n$recognizedText");
       return recognizedText.text;
-    } catch (e) {}
+    } catch (e) {
+      // Handle any exceptions if needed
+      print("Error recognizing text: $e");
+      return null;
+    }
   }
 
   Future<String?> translateText(String recognizedText) async {
@@ -73,8 +85,17 @@ class _TextRecognitionAndTranslationWidgetState
               .firstWhere((element) => element.bcpCode == languageCode),
           targetLanguage: TranslateLanguage.english);
       final translatedText = await translator.translateText(recognizedText);
+
+      // Update the state variable with the translated text
+      setState(() {
+        this.translatedText = translatedText;
+      });
+      print("translated text $translatedText");
+
+      return translatedText;
     } catch (e) {
-      print('erorr sucker');
+      print('error: $e');
+      return null;
     }
   }
 
@@ -92,9 +113,15 @@ class _TextRecognitionAndTranslationWidgetState
           ),
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Text(
-              recognizedText ?? 'No text recognized yet.',
-              style: TextStyle(fontSize: 16),
+            child: Container(
+              width: double.infinity,
+              child: SingleChildScrollView(
+                scrollDirection: Axis.vertical, // Use vertical scrolling
+                child: Text(
+                  recognizedText ?? 'No text recognized yet.',
+                  style: TextStyle(fontSize: 20), // Increase font size
+                ),
+              ),
             ),
           ),
           const Padding(
@@ -105,12 +132,18 @@ class _TextRecognitionAndTranslationWidgetState
             ),
           ),
           Padding(
-            padding: EdgeInsets.all(8.0),
-            child: Text(
-              translatedText ?? 'Translation not available.',
-              style: const TextStyle(fontSize: 16),
+            padding: const EdgeInsets.all(8.0),
+            child: Container(
+              width: double.infinity,
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal, // Use vertical scrolling
+                child: Text(
+                  translatedText ?? 'No text recognized yet.',
+                  style: TextStyle(fontSize: 20), // Increase font size
+                ),
+              ),
             ),
-          ),
+          )
         ],
       ),
       floatingActionButton: FloatingActionButton(

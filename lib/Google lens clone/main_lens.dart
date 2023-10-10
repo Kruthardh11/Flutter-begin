@@ -11,18 +11,72 @@ class MainLens extends StatefulWidget {
 }
 
 class _MainLensState extends State<MainLens> {
+  String selectedOption = 'Text Recognition'; // Default selected option
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Title(
-            color: Colors.black,
-            child: const Text(
-              'Google Lens',
-              style: TextStyle(color: Color.fromARGB(255, 116, 166, 251)),
-            )),
+          color: Colors.black,
+          child: const Text(
+            'Google Lens',
+            style: TextStyle(color: Color.fromARGB(255, 116, 166, 251)),
+          ),
+        ),
       ),
-      body: ImageLabelling(),
+      body: _buildBody(),
+      drawer: _buildDrawer(),
+    );
+  }
+
+  Widget _buildBody() {
+    switch (selectedOption) {
+      case 'Translator':
+        return const TextRecognitionAndTranslationWidget();
+      case 'Text Recognition':
+        return const TextRecogniser();
+      case 'Image Labelling':
+      default:
+        return const ImageLabelling();
+    }
+  }
+
+  Widget _buildDrawer() {
+    return Drawer(
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: [
+          const DrawerHeader(
+            decoration: BoxDecoration(
+              color: Color.fromARGB(255, 116, 166, 251),
+            ),
+            child: Text(
+              'Options',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 24,
+              ),
+            ),
+          ),
+          _buildDrawerItem('Image Labelling'),
+          _buildDrawerItem('Translator'),
+          _buildDrawerItem('Text Recognition'),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDrawerItem(String option) {
+    return ListTile(
+      title: Text(option),
+      selected: selectedOption == option,
+      onTap: () {
+        setState(() {
+          selectedOption = option;
+          Navigator.pop(context); // Close the drawer
+        });
+      },
     );
   }
 }
