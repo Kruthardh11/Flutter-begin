@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:firebase_integrate/dashboard/dashboard.dart';
+import 'package:firebase_integrate/form/edit.dart';
 import 'package:firebase_integrate/form/form_model.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -144,12 +145,6 @@ class _FormPageOneState extends State<FormPageOne> {
     } catch (e) {
       print('Error uploading image to Firebase Storage: $e');
     }
-  }
-
-  Future<void> _saveImageToHive(XFile imageFile) async {
-    final bytes = await File(imageFile.path).readAsBytes();
-    final box = await Hive.openBox('images');
-    await box.put('my_image_key', bytes);
   }
 
   @override
@@ -384,6 +379,14 @@ class _FormPageOneState extends State<FormPageOne> {
                       },
                       child: const Text('Submit'),
                     ),
+                    FloatingActionButton(onPressed: () {
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              const Edit(), // Replace 'Dashboard' with your actual widget
+                        ),
+                      );
+                    })
                   ],
                 ),
               ),

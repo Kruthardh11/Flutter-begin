@@ -1,5 +1,6 @@
 import 'package:firebase_integrate/Google%20lens%20clone/image_lebelling.dart';
 import 'package:firebase_integrate/Google%20lens%20clone/object_detector.dart';
+import 'package:firebase_integrate/Google%20lens%20clone/qr_scanenr.dart';
 import 'package:firebase_integrate/Google%20lens%20clone/text_recogniser.dart';
 import 'package:flutter/material.dart';
 
@@ -36,6 +37,8 @@ class _MainLensState extends State<MainLens> {
         return const TextRecognitionAndTranslationWidget();
       case 'Text Recognition':
         return const TextRecogniser();
+      case 'Qr Scanner':
+        return const QrScanner();
       case 'Image Labelling':
       default:
         return const ImageLabelling();
@@ -62,6 +65,7 @@ class _MainLensState extends State<MainLens> {
           _buildDrawerItem('Image Labelling'),
           _buildDrawerItem('Translator'),
           _buildDrawerItem('Text Recognition'),
+          _buildDrawerItem('Qr Scanner')
         ],
       ),
     );
