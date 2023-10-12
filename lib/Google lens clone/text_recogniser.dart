@@ -141,7 +141,6 @@ class _TextRecogniserState extends State<TextRecogniser> {
             onPressed: () {
               launchUrl(searchResultsUrl, mode: LaunchMode.inAppWebView);
             },
-            tooltip: 'Capture Image from Camera',
           ),
         ],
       ),

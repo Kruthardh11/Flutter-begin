@@ -22,8 +22,6 @@ if (flutterVersionName == null) {
     flutterVersionName = '1.0'
 }
 
-//apply from: project(':flutter_config').projectDir.getPath() + ".dotenv.gradle"
-
 android {
     namespace "com.example.firebase_integrate"
     compileSdkVersion flutter.compileSdkVersion
@@ -37,10 +35,6 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
-    aaptOptions {
-        noCompress 'tflite'
-        noCompress 'lite'
-    }
 
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
@@ -51,7 +45,7 @@ android {
         applicationId "com.example.firebase_integrate"
         // You can update the following values to match your application needs.
         // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
-        minSdkVersion 21
+        minSdkVersion 19
         targetSdkVersion flutter.targetSdkVersion
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
@@ -64,6 +58,8 @@ android {
             signingConfig signingConfigs.debug
         }
     }
+ 
+
 }
 
 flutter {
@@ -75,4 +71,6 @@ configurations.all {
         force 'com.squareup.okio:okio:1.17.5'
     }
 }
-dependencies {}
+dependencies {
+    
+}

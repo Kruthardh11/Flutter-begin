@@ -1,3 +1,4 @@
+import 'package:firebase_integrate/Google%20lens%20clone/color_identifier.dart';
 import 'package:firebase_integrate/Google%20lens%20clone/image_lebelling.dart';
 import 'package:firebase_integrate/Google%20lens%20clone/object_detector.dart';
 import 'package:firebase_integrate/Google%20lens%20clone/qr_scanenr.dart';
@@ -5,7 +6,7 @@ import 'package:firebase_integrate/Google%20lens%20clone/text_recogniser.dart';
 import 'package:flutter/material.dart';
 
 class MainLens extends StatefulWidget {
-  const MainLens({super.key});
+  const MainLens();
 
   @override
   State<MainLens> createState() => _MainLensState();
@@ -39,6 +40,8 @@ class _MainLensState extends State<MainLens> {
         return const TextRecogniser();
       case 'Qr Scanner':
         return const QrScanner();
+      case 'Color Identifier':
+        return const ColorIdentifier();
       case 'Image Labelling':
       default:
         return const ImageLabelling();
@@ -65,7 +68,8 @@ class _MainLensState extends State<MainLens> {
           _buildDrawerItem('Image Labelling'),
           _buildDrawerItem('Translator'),
           _buildDrawerItem('Text Recognition'),
-          _buildDrawerItem('Qr Scanner')
+          _buildDrawerItem('Qr Scanner'),
+          _buildDrawerItem('Color Identifier'),
         ],
       ),
     );
