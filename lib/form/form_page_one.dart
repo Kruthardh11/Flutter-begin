@@ -88,11 +88,7 @@ class _FormPageOneState extends State<FormPageOne> {
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
     if (pickedFile != null) {
-      // The user picked an image.
-      // You can use pickedFile.path to get the file path of the selected image.
-      // For example, to display the selected image, you can use an Image widget:
-      // You can also upload or process the image here.
-
+      
       setState(() {
         _selectedImage = File(pickedFile.path);
       });
@@ -106,10 +102,6 @@ class _FormPageOneState extends State<FormPageOne> {
     final pickedFile = await picker.pickImage(source: ImageSource.camera);
 
     if (pickedFile != null) {
-      // The user captured a new image.
-      // You can use pickedFile.path to get the file path of the captured image.
-      // For example, to display the captured image, you can use an Image widget:
-      // You can also upload or process the image here.
       final selectedImageFile = File(pickedFile.path);
 
       if (mounted) {

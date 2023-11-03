@@ -39,7 +39,6 @@ class _DashboardState extends State<Dashboard> {
   @override
   void initState() {
     super.initState();
-    // Assign the email value to the variable in the initState method
     Email = widget.email;
     fetchData(Email!);
     getLocation();
