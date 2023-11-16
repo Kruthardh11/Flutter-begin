@@ -9,6 +9,7 @@ import 'package:firebase_integrate/dashboard/dashboard.dart';
 import 'package:firebase_integrate/form/form_model.dart';
 import 'package:firebase_integrate/form/form_page_one.dart';
 import 'package:firebase_integrate/maps/main_page.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart';
@@ -317,7 +318,10 @@ class _MyHomePageState extends State<MyHomePage> {
         var data = jsonDecode(response.body.toString());
         print(data);
         userEmail = email;
-        print(email);
+        if (kDebugMode) {
+          print(email);
+        }
+        // ignore: use_build_context_synchronously
         Navigator.push(
           context,
           MaterialPageRoute(

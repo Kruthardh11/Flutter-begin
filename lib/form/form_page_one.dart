@@ -3,6 +3,7 @@ import 'package:firebase_integrate/dashboard/dashboard.dart';
 import 'package:firebase_integrate/form/edit.dart';
 import 'package:firebase_integrate/form/form_model.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -88,7 +89,6 @@ class _FormPageOneState extends State<FormPageOne> {
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
     if (pickedFile != null) {
-      
       setState(() {
         _selectedImage = File(pickedFile.path);
       });
@@ -133,9 +133,13 @@ class _FormPageOneState extends State<FormPageOne> {
 
       final urlDownload = await snapshot.ref.getDownloadURL();
       imageURL = urlDownload;
-      print(urlDownload);
+      if (kDebugMode) {
+        print(urlDownload);
+      }
     } catch (e) {
-      print('Error uploading image to Firebase Storage: $e');
+      if (kDebugMode) {
+        print('Error uploading image to Firebase Storage: $e');
+      }
     }
   }
 
