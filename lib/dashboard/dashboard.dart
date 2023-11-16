@@ -151,18 +151,23 @@ class _DashboardState extends State<Dashboard> {
             'gender': form.gender,
             'favSport': form.favSport,
           });
-          print('sending to online');
+          if (kDebugMode) {
+            print('sending to online');
+          }
           // If you want, you can delete the record from Hive after it's successfully sent to Firestore.
           // formData.delete(form.key);
         } catch (e) {
           // Handle any errors that might occur during Firestore write operations.
-          print('Error sending data to Firestore: $e');
+          if (kDebugMode) {
+            print('Error sending data to Firestore: $e');
+          }
         }
       }
       // Clear the data from Hive after successful synchronization
       formData.clear();
 
       // Show a snackbar to inform the user that the synchronization is complete
+      // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Data synchronized'),
@@ -279,7 +284,7 @@ class _DashboardState extends State<Dashboard> {
                     builder: (context) => const Images(),
                   ));
                 },
-                child: Text('images'))
+                child: const Text('images'))
           ],
         ),
       ),
@@ -312,7 +317,9 @@ class _DashboardState extends State<Dashboard> {
           }
         }
         // Now, 'dataForTargetHour' contains the values for the current hour
-        print('Values recieved');
+        if (kDebugMode) {
+          print('Values recieved');
+        }
         // Call the `setState` method to update the UI with the weather data
         setState(() {
           this.dataForTargetHour = dataForTargetHour;
@@ -322,11 +329,17 @@ class _DashboardState extends State<Dashboard> {
           windSpeed = dataForTargetHour['windSpeed'] ?? 0.0;
         });
       } else {
-        print('Request failed with status: ${response.statusCode}');
-        print(response.body);
+        if (kDebugMode) {
+          print('Request failed with status: ${response.statusCode}');
+        }
+        if (kDebugMode) {
+          print(response.body);
+        }
       }
     } catch (error) {
-      print('Error: $error');
+      if (kDebugMode) {
+        print('Error: $error');
+      }
     }
   }
 }
