@@ -380,8 +380,7 @@ class _FormPageOneState extends State<FormPageOne> {
                             SnackBar(
                               content: const Text("Data stored offline"),
                               backgroundColor: Colors.green.withOpacity(0.2),
-                              duration: const Duration(
-                                  seconds: 3), // Adjust the duration as needed
+                              duration: const Duration(seconds: 3),
                             ),
                           );
                         }
@@ -391,8 +390,7 @@ class _FormPageOneState extends State<FormPageOne> {
                     FloatingActionButton(onPressed: () {
                       Navigator.of(context).pushReplacement(
                         MaterialPageRoute(
-                          builder: (context) =>
-                              const Edit(), // Replace 'Dashboard' with your actual widget
+                          builder: (context) => const Edit(),
                         ),
                       );
                     })
