@@ -7,6 +7,7 @@ import 'package:firebase_integrate/dashboard/wearther_card.dart';
 import 'package:firebase_integrate/form/form_model.dart';
 import 'package:firebase_integrate/form/show_offline.dart';
 import 'package:firebase_integrate/maps/images.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:http/http.dart' as http;
@@ -50,7 +51,8 @@ class _DashboardState extends State<Dashboard> {
 
   Future<void> getLocation() async {
     try {
-      LocationPermission permission;
+      // ignore: unused_local_variable
+      LocationPermission? permission;
       permission = await Geolocator.requestPermission();
       Position position = await Geolocator.getCurrentPosition(
           desiredAccuracy: LocationAccuracy.best);
@@ -59,7 +61,9 @@ class _DashboardState extends State<Dashboard> {
         longitude = position.longitude;
       });
     } catch (e) {
-      print("Error getting location: $e");
+      if (kDebugMode) {
+        print("Error getting location: $e");
+      }
     }
   }
 
@@ -101,12 +105,18 @@ class _DashboardState extends State<Dashboard> {
         });
       } else {
         // If the request fails, you can handle the error here
-        print('Request failed with status: ${response.statusCode}');
-        print(response.body);
+        if (kDebugMode) {
+          print('Request failed with status: ${response.statusCode}');
+        }
+        if (kDebugMode) {
+          print(response.body);
+        }
       }
     } catch (error) {
       // Handle any exceptions that might occur during the request
-      print('Error: $error');
+      if (kDebugMode) {
+        print('Error: $error');
+      }
     }
   }
 
