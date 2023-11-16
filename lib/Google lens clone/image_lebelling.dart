@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_ml_kit/google_ml_kit.dart';
@@ -77,7 +78,9 @@ class _ImageLabellingState extends State<ImageLabelling> {
     imageLabeler.close();
     searchText = sb.toString();
     imageLabelling = false;
-    print(searchText);
+    if (kDebugMode) {
+      print(searchText);
+    }
     _performGoogleSearch();
     setState(() {});
   }
@@ -93,7 +96,9 @@ class _ImageLabellingState extends State<ImageLabelling> {
     // Construct the Google search URL
     final url = 'https://www.google.com/search?q=$encodedQuery';
     searchResultsUrl = Uri.parse(url);
-    print(searchResultsUrl);
+    if (kDebugMode) {
+      print(searchResultsUrl);
+    }
   }
 
   @override

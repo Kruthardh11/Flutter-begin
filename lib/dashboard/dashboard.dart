@@ -125,7 +125,9 @@ class _DashboardState extends State<Dashboard> {
   Future<void> getOfflineData() async {
     List<FormModel> offlineData = formData.values.toList();
     var path = formData.path;
-    print(path);
+    if (kDebugMode) {
+      print(path);
+    }
     await syncData(offlineData);
   }
 
