@@ -93,7 +93,9 @@ class _FormPageOneState extends State<FormPageOne> {
         _selectedImage = File(pickedFile.path);
       });
     } else {
-      print("BAlls");
+      if (kDebugMode) {
+        print("BAlls");
+      }
     }
   }
 
@@ -110,10 +112,14 @@ class _FormPageOneState extends State<FormPageOne> {
         });
       }
 
-      print(_selectedImage);
+      if (kDebugMode) {
+        print(_selectedImage);
+      }
     } else {
       // The user canceled capturing an image.
-      print("Image capture canceled");
+      if (kDebugMode) {
+        print("Image capture canceled");
+      }
     }
   }
 
@@ -317,6 +323,7 @@ class _FormPageOneState extends State<FormPageOne> {
                               });
 
                               // Show success SnackBar
+                              // ignore: use_build_context_synchronously
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: const Text("Data stored ONLINE"),
@@ -327,6 +334,7 @@ class _FormPageOneState extends State<FormPageOne> {
                                           3), // Adjust the duration as needed
                                 ),
                               );
+                              // ignore: use_build_context_synchronously
                               Navigator.of(context).pushReplacement(
                                 MaterialPageRoute(
                                   builder: (context) => Dashboard(
@@ -337,6 +345,7 @@ class _FormPageOneState extends State<FormPageOne> {
                             } catch (error) {
                               // Show error SnackBar
                               print(error);
+                              // ignore: use_build_context_synchronously
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: Text(
@@ -361,8 +370,12 @@ class _FormPageOneState extends State<FormPageOne> {
                                   favSport: _favoriteSports,
                                   password: _passwordController.text));
                           var path = formData.path;
-                          print(path);
-                          print("OFFLINE data logged!");
+                          if (kDebugMode) {
+                            print(path);
+                          }
+                          if (kDebugMode) {
+                            print("OFFLINE data logged!");
+                          }
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: const Text("Data stored offline"),
